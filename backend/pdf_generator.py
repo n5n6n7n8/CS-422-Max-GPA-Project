@@ -206,7 +206,7 @@ def _build_term_pages(major_name: str, term_name: str, courses: dict[str, list[I
 	start_page() # every term starts on a fresh page
 
 	for course_name, instructor_graphs in courses.items():
-		# Format list of instructor data into rows of 3
+		# Format list of instructor data into rows of 3 & add 'All Instructors' graph
 		graph_rows = _format_instructor_graphs(instructor_graphs)
 		height_needed = section_height(len(graph_rows))
 
