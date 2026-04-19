@@ -1,18 +1,88 @@
+h1{
+    font-size: 3rem;
+    margin-top: 1rem;
+    font-family: UnitedSansReg-Heavy, Veranda, sans-serif;
+    text-decoration: underline;
+    text-align: center;
+    color: rgb(46, 84, 45);
+}
+
+#space{
+    padding: 1.5rem;
+}
+p{
+    font-size:1.3rem;
+}
+
 #inputPanel {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 10vh;
-    margin-top: 100px;
+    background-color: rgb(180, 222, 236);
+
+    margin: 0 auto;
+    padding: 3rem;
+    width: 50rem;
+    height: 15rem;
+        
+    border-radius: 0.7rem;
+    border-style: solid;
+    border-color: rgb(113, 125, 145);
+    border-width: 0.1rem;
+    font-family: SourceSansPro-Regular, Veranda, sans-serif;
+    
 }
 #inputPanel * {
-    margin: 5px;
+    margin: 10px;
+}
+#roleDropdown{
+    font-size:1rem;
+}
+#yearDropdown{
+    font-size:1rem;
+}
+#roleDropdown:hover{
+    cursor:pointer;
+}
+#yearDropdown:hover{
+    cursor:pointer;
 }
 #submitBtn {
-    width: 100px;
-    font-size: 1.3rem;
-    padding: 1rem;
-    margin-top: 40px;
+    width: 200px;
+    margin-top: 55px;
+    padding: 10px;
     text-align: center;
+    border-block-color: black;
+    font-family:UnitedSansReg-Heavy, Veranda;
+    font-size:2rem;
+    color: rgb(26, 64, 25);
+
+}
+#submitBtn:hover {
+    cursor: pointer;
+}
+
+@font-face {
+  font-family: 'UnitedSansReg-Heavy';
+  src: url('https://static.wfonts.com/data/2016/05/23/united-sans-reg/UnitedSansReg-Heavy.woff') format('woff');
+  font-display: swap;
+}
+
+#preview-render {
+  font-family: 'UnitedSansReg-Light', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 32px;
+  color: #373c44;
+}
+
+@font-face {
+  font-family: 'SourceSansPro-Regular';
+  src: url('https://static.wfonts.com/data/2016/07/23/source-sans-pro/SourceSansPro-Regular.otf') format('otf');
+  font-display: swap;
+}
+
+#preview-render {
+  font-family: 'SourceSansPro-Regular', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 32px;
+  color: #373c44;
 }
