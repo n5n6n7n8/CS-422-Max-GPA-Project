@@ -44,6 +44,21 @@ def create_degree(degree_title):
         click.echo(f"Created degree program '{degree_title}' with {insert_count} courses.")
 
 
+# Test command to get academic years available in grade history table
+@app.cli.command('get-ays')
+def get_academic_years():
+    from models import get_academic_years
+    ays = get_academic_years()
+    click.echo(f"Academic years in grade history: {ays}")
+
+# Test command to get degrees available in degree table
+@app.cli.command('get-degrees')
+def get_degrees():
+    from models import get_degrees
+    degrees = get_degrees()
+    click.echo(f"Degrees in degree table: {degrees}")
+
+
 @app.route('/')
 def index():
     return render_template('index.html')

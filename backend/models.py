@@ -66,3 +66,17 @@ def insert_grade_data(normalized_rows):
         inserted_count += cursor.rowcount
     db.commit()
     return inserted_count
+
+
+# Get academic years available in the grade_history table
+def get_academic_years():
+    db = get_db()
+    rows = db.execute("SELECT DISTINCT academic_year FROM grade_history ORDER BY academic_year ASC").fetchall()
+    return [row['academic_year'] for row in rows]
+
+
+# Get list of (degree_id, degree_title) for all degree programs in the DB
+def get_degrees():
+    db = get_db()
+    rows = db.execute("SELECT degree_id, degree_title FROM degree").fetchall()
+    return [(row['degree_id'], row['degree_title']) for row in rows]
