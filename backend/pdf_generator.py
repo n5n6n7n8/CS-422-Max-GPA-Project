@@ -17,12 +17,7 @@ from matplotlib.axes import Axes
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.figure import Figure
 
-# (A, B, C, DNF) counts for a single course & instructor (or all instructors for a course)
-GradeCounts = tuple[int, int, int, int]
-# (Instructor Name, GradeCounts) for a single course
-InstructorDistribution = tuple[str, GradeCounts]
-# Term -> Course -> List of (Instructor Name, GradeCounts)
-TermCourseData = dict[str, dict[str, list[InstructorDistribution]]]
+from models import GradeCounts, InstructorDistribution, TermCourseData, get_term_course_data
 
 # Fixed x-axis bar order for each chart
 GRADE_LABELS = ("A", "B", "C", "DNF")
@@ -283,7 +278,7 @@ def _write_pdf(pdf: PdfPages, degree_id, year_from, year_to) -> None:
 	# TODO: Query SQL database for real course data
 	# Right now we just use sample data for testing
 	major_name = "Bachelor of Arts in Business Administration"
-	course_data = sample_data
+	course_data = get_term_course_data(degree_id, year_from, year_to)
 
 	# Text for the front page of the report
 	front_page_text1 = f"""The following report charts the grades assigned

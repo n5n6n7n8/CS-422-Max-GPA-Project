@@ -67,8 +67,8 @@ def index():
 @app.route('/download-report')
 def download_report():
     degree_id = request.args.get('degree_id', type=int)
-    year_from = request.args.get('year_from', type=int)
-    year_to = request.args.get('year_to', type=int)
+    year_from = request.args.get('year_from', type=str)
+    year_to = request.args.get('year_to', type=str)
 
     if (degree_id is None) or (year_from is None) or (year_to is None):
         return "ERROR: Missing required query parameters", 400
