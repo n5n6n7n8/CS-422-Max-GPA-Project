@@ -1,11 +1,18 @@
 <html>
     <head>
         <title>Max GPA Calculator</title>
-    </head>
+        </head>
+        <link rel = "stylesheet" href="stylemain.css"/>
     <body>
         <h1>Max GPA Calculator</h1>
-        <p>
-            <a href="/download-report?degree_id=1&year_from=2017&year_to=2020">Generate Sample Grade Report</a>
-        </p>
+        <div id="space"></div>
+        <div id="inputPanel">
+            <p> Select Role: </p>
+            <select name="Role" id="roleDropdown">
+                <option value="student">Student</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button id="submitBtn">Submit</button>
+        </div>
     </body>
 </html>
