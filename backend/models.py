@@ -8,55 +8,6 @@ InstructorDistribution = tuple[str, GradeCounts]
 TermCourseData = dict[str, dict[str, list[InstructorDistribution]]]
 
 
-# Takes a degree & year range, queries DB for grade data of courses that degree & year range,
-# and returns that data in the form of a TermCourseData object.
-def get_term_course_data(degree_id, year_from, year_to):
-    db = get_db()
-    rows = db.execute(
-        """
-        SELECT dc.year, dc.term, dc.course_key, dc.course_title, gh.instructor_name, gh.a_count, gh.b_count, gh.c_count, gh.dnf_count
-        FROM degree_courses dc
-        JOIN grade_history gh ON dc.course_key = gh.course_key
-        WHERE dc.degree_id = ? AND gh.academic_year BETWEEN ? AND ?
-        """,
-        (degree_id, year_from, year_to)
-    ).fetchall()
-
-    # print(len(rows))
-
-    term_course_data: TermCourseData = {}
-    for row in rows:
-        year = row['year']
-        term = row['term']
-        course_key = f"{row['course_key']} - {row['course_title']}"
-        instructor_name = row['instructor_name']
-        grade_counts = (row['a_count'], row['b_count'], row['c_count'], row['dnf_count'])
-
-        if (grade_counts == (0, 0, 0, 0)):
-            continue # skip courses with no grade data
-
-        term_str = f"Year {year} - Term {term}"
-        if term_str not in term_course_data:
-            term_course_data[term_str] = {}
-        
-        if course_key not in term_course_data[term_str]:
-            term_course_data[term_str][course_key] = []
-        
-        # If instructor already exists for this course, add grade counts to existing counts
-        instructor_found = False
-        for i, (old_instructor, old_counts) in enumerate(term_course_data[term_str][course_key]):
-            if old_instructor == instructor_name:
-                new_counts = tuple(existing + new for existing, new in zip(old_counts, grade_counts))
-                term_course_data[term_str][course_key][i] = (old_instructor, new_counts)
-                instructor_found = True
-                break
-        # Otherwise, add the new instructor & grade counts
-        if not instructor_found:
-            term_course_data[term_str][course_key].append((instructor_name, grade_counts))
-    
-    return term_course_data
-
-
 # Add a new degree program to DB w/ the given title and list of courses (rows from CSV)
 # rows should be in the following format (example):
 # [
@@ -137,3 +88,49 @@ def get_degrees():
     db = get_db()
     rows = db.execute("SELECT degree_id, degree_title FROM degree").fetchall()
     return [(row['degree_id'], row['degree_title']) for row in rows]
+
+
+# Takes a degree & year range, queries DB for grade data of courses that degree & year range,
+# and returns that data in the form of a TermCourseData object.
+def get_term_course_data(degree_id, year_from, year_to):
+    db = get_db()
+    rows = db.execute(
+        """
+        SELECT dc.year, dc.term, dc.course_key, dc.course_title, gh.instructor_name, gh.a_count, gh.b_count, gh.c_count, gh.dnf_count
+        FROM degree_courses dc
+        JOIN grade_history gh ON dc.course_key = gh.course_key
+        WHERE dc.degree_id = ? AND gh.academic_year BETWEEN ? AND ?
+        """,
+        (degree_id, year_from, year_to)
+    ).fetchall()
+
+    # print(len(rows))
+
+    term_course_data: TermCourseData = {}
+    for row in rows:
+        year = row['year']
+        term = row['term']
+        course_key = f"{row['course_key']} - {row['course_title']}"
+        instructor_name = row['instructor_name']
+        grade_counts = (row['a_count'], row['b_count'], row['c_count'], row['dnf_count'])
+
+        term_str = f"Year {year} - Term {term}"
+        if term_str not in term_course_data:
+            term_course_data[term_str] = {}
+        
+        if course_key not in term_course_data[term_str]:
+            term_course_data[term_str][course_key] = []
+        
+        # If instructor already exists for this course, add grade counts to existing counts
+        instructor_found = False
+        for i, (old_instructor, old_counts) in enumerate(term_course_data[term_str][course_key]):
+            if old_instructor == instructor_name:
+                new_counts = tuple(existing + new for existing, new in zip(old_counts, grade_counts))
+                term_course_data[term_str][course_key][i] = (old_instructor, new_counts)
+                instructor_found = True
+                break
+        # Otherwise, add the new instructor & grade counts
+        if not instructor_found:
+            term_course_data[term_str][course_key].append((instructor_name, grade_counts))
+    
+    return term_course_data
