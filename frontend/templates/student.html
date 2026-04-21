@@ -5,16 +5,41 @@
         <link rel = "stylesheet" href="stylemain.css"/>
     <body>
         <h1>Student Menu</h1>
-        <a href="index.html" class="button">Back</a>
+        <a id="backtext" href="index.html" class="button">Back</a>
         <div id="space"></div>
         <div id="inputPanel">
+            <p> Select Years: </p>
+            <div id="yearRangePanel">
+                <select name="YearS" id="yearDropdown">
+                    <option value="16">2016</option>
+                    <option value="17">2017</option>
+                    <option value="18">2018</option>
+                    <option value="19">2019</option>
+                    <option value="20">2020</option>
+                    <option value="21">2021</option>
+                    <option value="22">2022</option>
+                    <option value="23">2023</option>
+                </select>
+                <select name="YearE" id="yearDropdown">
+                    <option value="17">2017</option>
+                    <option value="18">2018</option>
+                    <option value="19">2019</option>
+                    <option value="20">2020</option>
+                    <option value="21">2021</option>
+                    <option value="22">2022</option>
+                    <option value="23">2023</option>
+                    <option value="24">2024</option>
+                </select>
+            </div>
             <p> Select Major: </p>
             <select name="Major" id="roleDropdown">
                 <option value="Accounting">Accounting</option>
                 <option value="Business">Business</option>
                 <option value="Computer Science">Computer Science</option>
             </select>
+
             <button id="PDFbtn">Generate PDF</button>
+            <!-- YEAR MUST BE A RANGE-->
         </div>
         
     </body>
