@@ -19,25 +19,24 @@ app.teardown_appcontext(close_db)
 @app.cli.command('load-grade-data')
 @click.argument('csv_path')
 def load_grade_data(csv_path):
-    from csv_parser import load_normalized_rows
-    normalized_rows = load_normalized_rows(csv_path)
+    from csv_parser import load_grade_data_from_csv
+    normalized_rows = load_grade_data_from_csv(csv_path)
     insert_count = insert_grade_data(normalized_rows)
     click.echo(f"Loaded {insert_count} rows into the database.")
 
 
-# Command line command to add degree program to DB w/ test data
+# Command line command to add degree program to DB w/ data from CSV
 # This is just some sample code to test out the DB operations
 @app.cli.command('create-degree')
 @click.argument('degree_title')
-def create_degree(degree_title):
+@click.argument('csv_path')
+def create_degree(degree_title, csv_path):
     from models import create_degree
-    rows = [
-        {'year': 1, 'term': 1, 'course_subj': 'BA', 'course_num': '101Z', 'title': 'Intro to Business'},
-        {'year': 1, 'term': 2, 'course_subj': 'CS', 'course_num': '101', 'title': 'Intro to Computer Science'},
-        {'year': 2, 'term': 1, 'course_subj': 'MATH', 'course_num': '201', 'title': 'Calculus I'},
-        {'year': 2, 'term': 2, 'course_subj': 'MATH', 'course_num': '202', 'title': 'Calculus II'},
-    ]
+    from csv_parser import load_degree_data_from_csv
+
+    rows = load_degree_data_from_csv(csv_path)
     existing_degree, insert_count = create_degree(degree_title, rows)
+    
     if existing_degree:
         click.echo(f"Updated degree program '{degree_title}' with {insert_count} courses.")
     else:

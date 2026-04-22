@@ -322,8 +322,8 @@ def normalize_row(raw_row):
     }
 
 
-def load_normalized_rows(csv_path):
-    """Read the CSV and return normalized rows."""
+def load_grade_data_from_csv(csv_path):
+    """Read a CSV of grade history data and return normalized rows."""
     normalized_rows = []
 
     with open(csv_path, newline="", encoding="utf-8-sig") as file:
@@ -336,6 +336,31 @@ def load_normalized_rows(csv_path):
                 normalized_rows.append(normalized)
 
     return normalized_rows
+
+
+def load_degree_data_from_csv(csv_path):
+    """Read degree course data from CSV and return in format for models.create_degree"""
+    degree_courses = []
+
+    with open(csv_path, newline="", encoding="utf-8-sig") as file:
+        reader = csv.DictReader(file)
+
+        for row in reader:
+            year = int(row.get("YEAR", 0))
+            term = int(row.get("TERM", 0))
+            course_subj = normalize_text(row.get("SUBJ"))
+            course_num = normalize_text(row.get("NUMB"))
+            title = normalize_text(row.get("TITLE"))
+
+            degree_courses.append({
+                "year": year,
+                "term": term,
+                "course_subj": course_subj,
+                "course_num": course_num,
+                "title": title
+            })
+
+    return degree_courses
 
 
 def aggregate_by_course(normalized_rows):
@@ -432,7 +457,7 @@ def print_sample_rows(normalized_rows, limit=3):
 if __name__ == "__main__":
     csv_path = "backend/pub_rec_master_w2016-f2025.csv"
 
-    normalized_rows = load_normalized_rows(csv_path)
+    normalized_rows = load_grade_data_from_csv(csv_path)
 
     print("Normalized rows:", len(normalized_rows))
     print()

@@ -8,12 +8,8 @@ InstructorDistribution = tuple[str, GradeCounts]
 TermCourseData = dict[str, dict[str, list[InstructorDistribution]]]
 
 
-# Add a new degree program to DB w/ the given title and list of courses (rows from CSV)
-# rows should be in the following format (example):
-# [
-#     {'year': 1, 'term': 1, 'course_subj': 'BA', 'course_num': '101Z', 'title': 'Intro to Business'},
-#     ...
-# ]
+# Add a new degree program to DB w/ the given title and list of courses (rows from CSV).
+# Use the output of csv_parser.load_degree_data_from_csv as input for this function.
 def create_degree(degree_title, rows):
     db = get_db()
     existing_degree = False
@@ -48,7 +44,7 @@ def create_degree(degree_title, rows):
 
 
 # Insert grade data into the database, replacing existing data
-# Use the output of csv_parser.load_normalized_rows as input for this function
+# Use the output of csv_parser.load_grade_data_from_csv as input for this function
 def insert_grade_data(normalized_rows):
     db = get_db()
     inserted_count = 0
