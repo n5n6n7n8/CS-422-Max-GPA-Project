@@ -36,7 +36,7 @@ def create_degree(degree_title, csv_path):
 
     rows = load_degree_data_from_csv(csv_path)
     existing_degree, insert_count = create_degree(degree_title, rows)
-    
+
     if existing_degree:
         click.echo(f"Updated degree program '{degree_title}' with {insert_count} courses.")
     else:
@@ -56,6 +56,13 @@ def get_degrees():
     from models import get_degrees
     degrees = get_degrees()
     click.echo(f"Degrees in degree table: {degrees}")
+
+# Test command to clear degree and degree_courses tables
+@app.cli.command('clear-degrees')
+def clear_degrees_command():
+    from models import clear_degrees
+    clear_degrees()
+    click.echo("Cleared degree and degree_courses tables.")
 
 
 @app.route('/')

@@ -56,49 +56,23 @@ GRADE_COLUMNS = [
     "F", "P", "N", "OTHER", "W"
 ]
 
-# Asked claude to find all courses with "CIS" prefix 
-# and map to "CS" for normalization
-# 2016-2022 has courses like "CIS 210" that are the same as "CS 210" in 2023-2024
-COURSE_ALIASES = {
-    "CIS 102": "CS 102",
-    "CIS 110": "CS 110",
-    "CIS 111": "CS 111",
-    "CIS 122": "CS 122",
-    "CIS 210": "CS 210",
-    "CIS 211": "CS 211",
-    "CIS 212": "CS 212",
-    "CIS 313": "CS 313",
-    "CIS 314": "CS 314",
-    "CIS 315": "CS 315",
-    "CIS 322": "CS 322",
-    "CIS 330": "CS 330",
-    "CIS 333": "CS 333",
-    "CIS 372M": "CS 372M",
-    "CIS 413": "CS 413",
-    "CIS 415": "CS 415",
-    "CIS 420": "CS 420",
-    "CIS 422": "CS 422",
-    "CIS 423": "CS 423",
-    "CIS 425": "CS 425",
-    "CIS 429": "CS 429",
-    "CIS 431": "CS 431",
-    "CIS 432": "CS 432",
-    "CIS 433": "CS 433",
-    "CIS 436": "CS 436",
-    "CIS 441": "CS 441",
-    "CIS 443": "CS 443",
-    "CIS 445": "CS 445",
-    "CIS 451": "CS 451",
-    "CIS 453": "CS 453",
-    "CIS 461": "CS 461",
-    "CIS 471": "CS 471",
-    "CIS 472": "CS 472",
-    "CIS 473": "CS 473",
-}
+def load_course_aliases(csv_path):
+    """Load course aliases from a CSV file."""
+    course_aliases = {}
+    with open(csv_path, newline="", encoding="utf-8-sig") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            change_from = row.get("CHANGE_FROM")
+            to = row.get("TO")
+            if change_from and to:
+                course_aliases[change_from.strip()] = to.strip()
+    return course_aliases
+
+COURSE_ALIASES = load_course_aliases("Reconciliation.csv")
+
 
 def apply_course_alias(course_key):
     return COURSE_ALIASES.get(course_key, course_key)
-
 
 
 def clean_cell(value):
@@ -179,16 +153,6 @@ def derive_academic_year_label(season_term, calendar_year):
 
     short_year = str(ay_start_year)[-2:]
     return "AY" + short_year
-
-
-def academic_year_in_supported_range(academic_year):
-    """Keep only AY16 through AY23."""
-    supported_years = {
-        "AY16", "AY17", "AY18", "AY19",
-        "AY20", "AY21", "AY22", "AY23"
-    }
-
-    return academic_year in supported_years
 
 
 def clean_grade_columns(row):
@@ -279,9 +243,6 @@ def normalize_row(raw_row):
 
     season_term, calendar_year = parse_term_desc(term_desc)
     academic_year = derive_academic_year_label(season_term, calendar_year)
-
-    if not academic_year_in_supported_range(academic_year):
-        return None
 
     term_code = normalize_text(raw_row.get("TERM"))
     subj = normalize_text(raw_row.get("SUBJ"))

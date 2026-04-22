@@ -8,6 +8,14 @@ InstructorDistribution = tuple[str, GradeCounts]
 TermCourseData = dict[str, dict[str, list[InstructorDistribution]]]
 
 
+# Delete everything from degree and degree_courses tables
+def clear_degrees():
+    db = get_db()
+    db.execute("DELETE FROM degree_courses")
+    db.execute("DELETE FROM degree")
+    db.commit()
+
+
 # Add a new degree program to DB w/ the given title and list of courses (rows from CSV).
 # Use the output of csv_parser.load_degree_data_from_csv as input for this function.
 def create_degree(degree_title, rows):
