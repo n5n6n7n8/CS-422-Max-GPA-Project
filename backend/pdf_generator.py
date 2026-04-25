@@ -175,6 +175,8 @@ def _build_term_pages(major_name: str, term_name: str, courses: dict[str, list[I
 		nonlocal page_index, figure, cur_y
 		# Each new page resets vertical cursor and repeats the heading block.
 		page_index += 1
+		if figure is not None:
+			plt.close(figure) # close previous page-figure to free memory
 		figure = plt.figure(figsize=(11, 14))
 		pages.append(figure)
 

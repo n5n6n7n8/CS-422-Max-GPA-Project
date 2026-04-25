@@ -64,6 +64,30 @@ def clear_degrees_command():
     clear_degrees()
     click.echo("Cleared degree and degree_courses tables.")
 
+# Test command to print all available degree CSV files in degree_data directory
+@app.cli.command('list-degree-csvs')
+def list_degree_csvs():
+    from models import get_available_degree_csv_files
+    csv_files = get_available_degree_csv_files()
+    if not csv_files:
+        click.echo("No CSV files found in degree_data folder.")
+    else:
+        click.echo("Available degree CSV files:")
+        for f in csv_files:
+            click.echo(f" - {f}")
+
+# Test command to print all available grade CSV files in grade_data directory
+@app.cli.command('list-grade-csvs')
+def list_grade_csvs():
+    from models import get_available_grade_csv_files
+    csv_files = get_available_grade_csv_files()
+    if not csv_files:
+        click.echo("No CSV files found in grade_data folder.")
+    else:
+        click.echo("Available grade CSV files:")
+        for f in csv_files:
+            click.echo(f" - {f}")
+
 
 @app.route('/')
 def index():

@@ -299,6 +299,24 @@ def load_grade_data_from_csv(csv_path):
     return normalized_rows
 
 
+def load_sample_grade_row(csv_path) -> dict | str:
+    """
+    Load a single sample row from grade CSV for confirmation.
+    If any errors occur or no non-null rows are found, return error message.
+    """
+    try:
+        normalized_rows = load_grade_data_from_csv(csv_path)
+        if not normalized_rows:
+            return "No valid rows found in CSV. Please check the file and try again."
+        else:
+            for row in normalized_rows:
+                if row["grade_buckets"]["A"] > 0 or row["grade_buckets"]["B"] > 0 or row["grade_buckets"]["C"] > 0:
+                    return row
+            return "No rows with non-null grades found in CSV. Please check the file and try again."
+    except Exception as e:
+        return f"Error loading grade rows from CSV: {e}"
+
+
 def load_degree_data_from_csv(csv_path):
     """Read degree course data from CSV and return in format for models.create_degree"""
     degree_courses = []
@@ -322,6 +340,24 @@ def load_degree_data_from_csv(csv_path):
             })
 
     return degree_courses
+
+
+def load_sample_degree_row(csv_path) -> dict | str:
+    """
+    Load a single sample row from degree CSV for confirmation.
+    If any errors occur or no non-null rows are found, return error message.
+    """
+    try:
+        normalized_rows = load_degree_data_from_csv(csv_path)
+        if not normalized_rows:
+            return "No valid rows found in CSV. Please check the file and try again."
+        else:
+            for row in normalized_rows:
+                if row["year"] > 0:
+                    return row
+            return "No valid rows found in CSV. Please check the file and try again."
+    except Exception as e:
+        return f"Error loading degree rows from CSV: {e}"
 
 
 def aggregate_by_course(normalized_rows):
@@ -416,19 +452,21 @@ def print_sample_rows(normalized_rows, limit=3):
 
 
 if __name__ == "__main__":
-    csv_path = "backend/pub_rec_master_w2016-f2025.csv"
+    csv_path = "grade_data/pub_rec_master_w2016-f2025.csv"
 
-    normalized_rows = load_grade_data_from_csv(csv_path)
+    print(load_sample_grade_row(csv_path))
 
-    print("Normalized rows:", len(normalized_rows))
-    print()
+    # normalized_rows = load_grade_data_from_csv(csv_path)
+
+    # print("Normalized rows:", len(normalized_rows))
+    # print()
 
     #print("Sample normalized rows:")
     #print_sample_rows(normalized_rows, limit=3)
 
-    cs_210_rows = [row for row in normalized_rows if row["course_key"] == "CS 210"]
+    # cs_210_rows = [row for row in normalized_rows if row["course_key"] == "CS 210"]
 
-    for row in cs_210_rows:
-        print(row)
-        print()
+    # for row in cs_210_rows:
+    #     print(row)
+    #     print()
     

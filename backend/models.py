@@ -8,6 +8,22 @@ InstructorDistribution = tuple[str, GradeCounts]
 TermCourseData = dict[str, dict[str, list[InstructorDistribution]]]
 
 
+def get_available_degree_csv_files():
+    import os
+    degree_csv_dir = 'degree_data'
+    if not os.path.exists(degree_csv_dir):
+        return []
+    return [f for f in os.listdir(degree_csv_dir) if f.lower().endswith('.csv')]
+
+
+def get_available_grade_csv_files():
+    import os
+    grade_csv_dir = 'grade_data'
+    if not os.path.exists(grade_csv_dir):
+        return []
+    return [f for f in os.listdir(grade_csv_dir) if f.lower().endswith('.csv')]
+
+
 # Delete everything from degree and degree_courses tables
 def clear_degrees():
     db = get_db()
@@ -104,6 +120,7 @@ def get_term_course_data(degree_id, year_from, year_to):
         FROM degree_courses dc
         JOIN grade_history gh ON dc.course_key = gh.course_key
         WHERE dc.degree_id = ? AND gh.academic_year BETWEEN ? AND ?
+        ORDER BY dc.year ASC, dc.term ASC, dc.course_key ASC
         """,
         (degree_id, year_from, year_to)
     ).fetchall()
