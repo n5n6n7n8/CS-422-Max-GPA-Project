@@ -37,13 +37,13 @@ p{
     padding: 4rem;
     width: 50vw;
     height: 15rem;
-        
+
     border-radius: 0.7rem;
     border-style: solid;
     border-color: rgb(113, 125, 145);
     border-width: 0.1rem;
     font-family: SourceSansPro-Regular, Veranda, sans-serif;
-    
+
 }
 #inputPanel * {
     margin: 20px;

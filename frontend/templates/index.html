@@ -1,8 +1,8 @@
 <html>
     <head>
         <title>Max GPA Calculator</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylemain.css') }}"/>
         </head>
-        <link rel = "stylesheet" href="stylemain.css"/>
     <body>
         <h1>Max GPA Calculator</h1>
         <div id="space"></div>
@@ -20,9 +20,9 @@
     function gotoMenu() {
         var role = document.getElementById("roleDropdown").value;
         if (role === "student") {
-            window.location.href = "student.html";
+            window.location.href = "student";
         } else if (role === "admin") {
-            window.location.href = "admin.html";
+            window.location.href = "admin";
         }
     }
     </script>

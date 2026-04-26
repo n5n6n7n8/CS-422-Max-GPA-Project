@@ -8,6 +8,7 @@ InstructorDistribution = tuple[str, GradeCounts]
 TermCourseData = dict[str, dict[str, list[InstructorDistribution]]]
 
 
+# Get list of available degree CSV files in degree_data directory
 def get_available_degree_csv_files():
     import os
     degree_csv_dir = 'degree_data'
@@ -16,6 +17,7 @@ def get_available_degree_csv_files():
     return [f for f in os.listdir(degree_csv_dir) if f.lower().endswith('.csv')]
 
 
+# Get list of available grade CSV files in grade_data directory
 def get_available_grade_csv_files():
     import os
     grade_csv_dir = 'grade_data'
