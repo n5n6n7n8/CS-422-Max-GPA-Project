@@ -12,7 +12,18 @@
                 <option value="student">Student</option>
                 <option value="admin">Admin</option>
             </select>
-            <button id="submitBtn">Submit</button>
+            <button onclick="gotoMenu()" id="submitBtn">Submit</button>
+
         </div>
     </body>
+    <script>
+    function gotoMenu() {
+        var role = document.getElementById("roleDropdown").value;
+        if (role === "student") {
+            window.location.href = "student.html";
+        } else if (role === "admin") {
+            window.location.href = "admin.html";
+        }
+    }
+    </script>
 </html>

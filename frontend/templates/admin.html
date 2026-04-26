@@ -5,15 +5,41 @@
         <link rel = "stylesheet" href="stylemain.css"/>
     <body>
         <h1>Administrator Menu</h1>
-        <a href="index.html" class="button">Back</a>
+        <a id="backtext" href="index.html" class="button">Back</a>
         <div id="space"></div>
         <div id="inputPanel">
-            <p> Upload CSV:</p>
-            <div id="csvPreview">
-                <input type="file" id="csvFile" accept=".csv">
+            Select Upload Type:
+            <select name="Upload Type" id="uploadDropdown">
+                <option value="grade">Grade</option>
+                <option value="degree">Degree</option>
+            </select>
+            <div id="gradeUpDiv">
+                <select name="Folder List" id="gradeFiles">
+                    <option value="grade1">LIST FILES HERE</option>
+                </select>
+                <button id="gradeUploadBtn">Upload Grades</button>
+            </div>
+            <div id="degreeUpDiv">
+                <select name="Folder List" id="degreeFiles">
+                    <option value="degree1">LIST FILES HERE</option>
+                </select>
+                <button id="degreeUploadBtn">Upload Degree Requirements</button>
             </div>
             <!--  /* grade data upload and degree upload (have text box for selecting major) data */   -->
             <!-- javascript code for showing sample output after upload-->
         </div>
     </body>
+    <script>
+        document.getElementById("uploadDropdown").addEventListener("change", function() {
+            var dropdownVal = this.value;
+            if (dropdownVal === "grade") {
+                document.getElementById("gradeUpDiv").style.display = "block";
+                document.getElementById("degreeUpDiv").style.display = "none";
+            } else if (dropdownVal === "degree") {
+                document.getElementById("gradeUpDiv").style.display = "none";
+                document.getElementById("degreeUpDiv").style.display = "block";
+            }
+        });
+    </script>
+    <script src="adminscript.js" type="module"></script>
 </html>

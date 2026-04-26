@@ -8,9 +8,9 @@
         <a id="backtext" href="index.html" class="button">Back</a>
         <div id="space"></div>
         <div id="inputPanel">
-            <p> Select Years: </p>
+            <p> Select Year Range: </p>
             <div id="yearRangePanel">
-                <select name="YearS" id="yearDropdown">
+                <select name="YearS" id="yearSDropdown">
                     <option value="16">2016</option>
                     <option value="17">2017</option>
                     <option value="18">2018</option>
@@ -20,7 +20,8 @@
                     <option value="22">2022</option>
                     <option value="23">2023</option>
                 </select>
-                <select name="YearE" id="yearDropdown">
+                -
+                <select name="YearE" id="yearEDropdown">
                     <option value="17">2017</option>
                     <option value="18">2018</option>
                     <option value="19">2019</option>
@@ -38,9 +39,19 @@
                 <option value="Computer Science">Computer Science</option>
             </select>
 
-            <button id="PDFbtn">Generate PDF</button>
-            <!-- YEAR MUST BE A RANGE-->
+            <button onclick="generatePDF()" id="PDFbtn">Generate PDF</button>
         </div>
         
     </body>
+    <script>
+        function generatePDF() {
+            var yearStart = document.getElementById("yearSDropdown").value;
+            var yearEnd = document.getElementById("yearEDropdown").value;
+            if (yearStart >= yearEnd) {
+                alert("Error: Start year must be before end year.");
+                return;
+            }
+            //else, generate PDF with the selected year range and major
+        }
+    </script>
 </html>
