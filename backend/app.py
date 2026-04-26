@@ -96,7 +96,8 @@ def index():
 
 @app.route('/student')
 def student():
-    return render_template('student.html')
+    from models import get_academic_years, get_degrees
+    return render_template('student.html', years=get_academic_years(), degrees=get_degrees())
 
 
 @app.route('/admin')

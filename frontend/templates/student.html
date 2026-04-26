@@ -9,49 +9,59 @@
         <div id="space"></div>
         <div id="inputPanel">
             <p> Select Year Range: </p>
+            <p id="description">
+                (Note: These are academic years, which start in Fall term.<br>For example, "AY20" includes data from Fall 2020 to Summer 2021.)
+            </p>
             <div id="yearRangePanel">
                 <select name="YearS" id="yearSDropdown">
-                    <option value="16">2016</option>
-                    <option value="17">2017</option>
-                    <option value="18">2018</option>
-                    <option value="19">2019</option>
-                    <option value="20">2020</option>
-                    <option value="21">2021</option>
-                    <option value="22">2022</option>
-                    <option value="23">2023</option>
+                    {% for year in years %}
+                    <option value="{{ year }}">{{ year }}</option>
+                    {% endfor %}
                 </select>
                 -
                 <select name="YearE" id="yearEDropdown">
-                    <option value="17">2017</option>
-                    <option value="18">2018</option>
-                    <option value="19">2019</option>
-                    <option value="20">2020</option>
-                    <option value="21">2021</option>
-                    <option value="22">2022</option>
-                    <option value="23">2023</option>
-                    <option value="24">2024</option>
+                    {% for year in years %}
+                    <option value="{{ year }}">{{ year }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            <p> Select Major: </p>
+            <p> Select Degree: </p>
             <select name="Major" id="roleDropdown">
-                <option value="Accounting">Accounting</option>
-                <option value="Business">Business</option>
-                <option value="Computer Science">Computer Science</option>
+                {% for degree in degrees %}
+                <option value="{{ degree[0] }}">{{ degree[1] }}</option>
+                {% endfor %}
             </select>
 
             <button onclick="generatePDF()" id="PDFbtn">Generate PDF</button>
         </div>
-        
+        <div id="loadingScreen">
+            <p id="loadingText">Generating PDF, please wait...</p>
+        </div>
     </body>
     <script>
         function generatePDF() {
+            // Ensure that start year is not after end year
             var yearStart = document.getElementById("yearSDropdown").value;
             var yearEnd = document.getElementById("yearEDropdown").value;
-            if (yearStart >= yearEnd) {
-                alert("Error: Start year must be before end year.");
+            if (yearStart > yearEnd) {
+                alert("Error: Start year can't be after end year.");
                 return;
             }
-            //else, generate PDF with the selected year range and major
+
+            // Display loading screen
+            document.getElementById("loadingScreen").style.display = "block";
+            // Change the number of periods in the loading text every 500ms (simple animation effect)
+            var loadingText = document.getElementById("loadingText");
+            var periodCount = 0;
+            setInterval(function() {
+                periodCount = (periodCount % 4) + 1; // Cycle through 1 to 4 periods
+                loadingText.textContent = "Generating PDF, please wait" + ".".repeat(periodCount);
+            }, 500);
+
+            // Redirect to URL that generates PDF report based on selected year range & degree
+            var major = document.getElementById("roleDropdown").value;
+            var url = `/download-report?year_from=${yearStart}&year_to=${yearEnd}&degree_id=${major}`;
+            window.location.href = url;
         }
     </script>
 </html>

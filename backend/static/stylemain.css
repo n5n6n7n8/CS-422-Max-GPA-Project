@@ -45,8 +45,14 @@ p{
     font-family: SourceSansPro-Regular, Veranda, sans-serif;
 
 }
-#inputPanel * {
-    margin: 20px;
+#inputPanel select {
+    margin-bottom: 32px;
+}
+#inputPanel p#description {
+    margin-top: -1.0rem;
+    font-size: 0.8rem;
+    color: rgb(56, 94, 55);
+    text-align: center;
 }
 #roleDropdown{
     margin-top:-0.5rem;
@@ -75,6 +81,27 @@ p{
 }
 #submitBtn:hover {
     cursor: pointer;
+}
+
+#loadingScreen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+}
+
+#loadingScreen p {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2rem;
+    font-family: UnitedSansReg-Heavy, Veranda, sans-serif;
+    color: rgb(26, 64, 25);
 }
 
 @font-face {
