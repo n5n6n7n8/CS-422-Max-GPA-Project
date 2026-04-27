@@ -10,23 +10,63 @@
         <div id="inputPanel">
             Select Upload Type:
             <select name="Upload Type" id="uploadDropdown">
-                <option value="grade">Grade</option>
-                <option value="degree">Degree</option>
+                <option value="grade" selected>Grade History</option>
+                <option value="degree">Degree Requirements</option>
             </select>
             <div id="gradeUpDiv">
-                <select name="Folder List" id="gradeFiles">
-                    <option value="grade1">LIST FILES HERE</option>
-                </select>
-                <button id="gradeUploadBtn">Upload Grades</button>
+                <p id="description">
+                    Grade CSV files should be placed in the "grade_data" folder.<br>Please see documentation for formatting details.
+                </p>
+                {% if grade_csvs|length == 0 %}
+                    <p style="color: red; font-weight: bold;">No CSV files found in "grade_data" folder. Please add a CSV file to upload grade data.</p>
+                {% else %}
+                    <div id="gradeFileDiv">
+                        <label for="gradeFiles">Grade CSV:</label>
+                        <select name="Folder List" id="gradeFiles">
+                        {% for file in grade_csvs %}
+                            <option value="{{ file }}">{{ file }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <button id="gradeUploadBtn" onclick="openConfirmModal(true)">Upload Grades</button>
+                {% endif %}
             </div>
-            <div id="degreeUpDiv">
-                <select name="Folder List" id="degreeFiles">
-                    <option value="degree1">LIST FILES HERE</option>
-                </select>
-                <button id="degreeUploadBtn">Upload Degree Requirements</button>
+            <div id="degreeUpDiv" style="display:none;">
+                <p id="description">
+                    Degree CSV files should be placed in the "degree_data" folder.<br>Please see documentation for formatting details.
+                </p>
+                {% if degree_csvs|length == 0 %}
+                    <p style="color: red; font-weight: bold;">No CSV files found in "degree_data" folder. Please add a CSV file to upload degree requirements.</p>
+                {% else %}
+                    <div id="degreeFileDiv">
+                        <label for="degreeFiles">Degree CSV:</label>
+                        <select name="Folder List" id="degreeFiles">
+                        {% for file in degree_csvs %}
+                            <option value="{{ file }}">{{ file }}</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    <div id="degreeNameDiv">
+                        <label for="degreeInput">Degree Name:</label>
+                        <input type="text" size="27" id="degreeInput" placeholder="e.g. 'Computer Science BS'">
+                    </div>
+                    <button id="degreeUploadBtn" onclick="openConfirmModal(false)">Upload Degree Requirements</button>
+                {% endif %}
             </div>
             <!--  /* grade data upload and degree upload (have text box for selecting major) data */   -->
             <!-- javascript code for showing sample output after upload-->
+        </div>
+        <div class="modal" id="confirmUploadModal">
+            <div class="modal-content">
+                <p class="modal-text"></p>
+                <button id="cancelUploadBtn" onclick="closeModal()">Cancel</button>
+                <button id="confirmUploadBtn" onclick="uploadData()">Upload Data</button>
+            </div>
+            <!-- <div class="modal-content" id="confirmDegreeFailed">
+                <h1 style="color: red; font-weight:bold;">ERROR:</h1>
+                <p class="modal-text"></p>
+                <button id="cancelDegreeBtn">Okay</button>
+            </div> -->
         </div>
     </body>
     <script>
@@ -40,6 +80,152 @@
                 document.getElementById("degreeUpDiv").style.display = "block";
             }
         });
+
+        // Toggle modal cancel button visibility
+        function toggleCancelButton(show) {
+            var cancelBtn = document.getElementById("cancelUploadBtn");
+            if (show) {
+                cancelBtn.style.display = "inline-block";
+            } else {
+                cancelBtn.style.display = "none";
+            }
+        }
+
+        // Toggle modal confirm button visibility
+        function toggleConfirmButton(show) {
+            var confirmBtn = document.getElementById("confirmUploadBtn");
+            if (show) {
+                confirmBtn.style.display = "inline-block";
+            } else {
+                confirmBtn.style.display = "none";
+            }
+        }
+
+        // Change the HTML inside the modal-text element
+        function setModalText(html) {
+            var modalText = document.querySelector(".modal-content .modal-text");
+            modalText.innerHTML = html;
+        }
+
+        // Set the modal to a loading state (change text, hide buttons)
+        function setModalLoading(message) {
+            setModalText(message || "Loading...");
+            toggleCancelButton(false);
+            toggleConfirmButton(false);
+        }
+
+        // Add an error message inside modal-text element, and only shows 'Cancel' button
+        function setModalError(message) {
+            var errorHtml = `
+                <h1 style="color: red; font-weight:bold;">ERROR:</h1>
+                <p>${message}</p>
+            `;
+            setModalText(errorHtml);
+            toggleCancelButton(true);
+            toggleConfirmButton(false);
+        }
+
+        // Add a success message inside the modal-text element
+        function setModalSuccess(message) {
+            var successHtml = `
+                <h1 style="color: green; font-weight:bold;">SUCCESS!</h1>
+                <p>${message}</p>
+            `;
+            setModalText(successHtml);
+        }
+
+        // Open the modal to display sample grade/degree data (or error if there is one)
+        function openConfirmModal(isGradeUpload) {
+            if (!isGradeUpload && document.getElementById("degreeInput").value.trim() === "") {
+                alert("Please enter a degree name before uploading.");
+                return;
+            }
+
+            var modal = document.getElementById("confirmUploadModal");
+            modal.style.display = "block";
+            setModalLoading();
+
+            // Use backend API to load sample row from CSV, or error if one occurs
+            apiUrl = isGradeUpload ? "/api/grade-sample-row" : "/api/degree-sample-row";
+            csvFile = isGradeUpload ? document.getElementById("gradeFiles").value : document.getElementById("degreeFiles").value;
+            fetch(apiUrl + "?csv=" + csvFile)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Success - Show confirmation message along with sample data from CSV
+                        var sampleRow = data.payload;
+                        modalText = isGradeUpload
+                            ? `Are you sure you want to upload this grade data?
+                               All existing grade data in the system will be overwritten.`
+                            : `Are you sure you want to upload this degree requirement file?
+                               This will overwrite the existing requirements if a degree with the same name is already in the system.`
+                        ;
+                        modalText += `
+                            <br>
+                            <br>
+                            The following is a preview of the formatted data, taken from 1 row of your CSV file.
+                            Please ensure that the data looks correct before confirming the upload:
+                            <textarea id="degreeModalSampleData" style="display:inline-block;" rows="10" cols="50" readonly>${JSON.stringify(sampleRow, null, 2)}</textarea>`
+                        ;
+                        setModalText(modalText);
+                        toggleCancelButton(true);
+                        toggleConfirmButton(true);
+                    } else {
+                        // Failure - Show error message from backend
+                        setModalError(data.payload || "An unexpected error occurred.");
+                    }
+                })
+                .catch(error => {
+                    // Failure - Show generic error message due to network/backend error
+                    console.error("Error fetching sample CSV row:", error);
+                    setModalError("An unexpected error occurred while loading sample CSV data. Please try again later.");
+                });
+        }
+
+        // Close the modal popup
+        function closeModal() {
+            var modal = document.getElementById("confirmUploadModal");
+            modal.style.display = "none";
+        }
+
+        // Call backend API to upload CSV data to DB -- when done, show success/error message in modal
+        function uploadData() {
+            isGradeUpload = document.getElementById("uploadDropdown").value === "grade";
+            setModalLoading("Uploading data...");
+
+            // Use backend API to perform the actual upload operation
+            apiUrl = isGradeUpload ? "/api/upload-grades" : "/api/upload-degree";
+            csvFile = isGradeUpload ? document.getElementById("gradeFiles").value : document.getElementById("degreeFiles").value;
+            degreeTitle = document.getElementById("degreeInput").value;
+            payload = isGradeUpload ? { csv: csvFile } : { csv: csvFile, degree_title: degreeTitle };
+
+            // Perform the POST request to upload data
+            fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Operation successful - show success message in modal with details from backend
+                    message = `${data.message}<br><br>You may now safely close this page.`;
+                    setModalSuccess(message);
+                    toggleCancelButton(false);
+                    toggleConfirmButton(false);
+                } else {
+                    // Operation failed - show error message in modal with details from backend
+                    message = `${data.message || "An unexpected error occurred."}<br><br>
+                    Please ensure you have followed all setup instructions and your CSV file is formatted correctly.
+                    Then, refresh the page and try again.`;
+                    setModalError(message);
+                }
+            })
+            .catch(error => {
+                // Operation failed due to network/backend error - show generic error message in modal
+                console.error("Error during upload:", error);
+                setModalError("An unexpected error occurred during upload. Please try again later.");
+            });
+        }
     </script>
-    <script src="adminscript.js" type="module"></script>
 </html>

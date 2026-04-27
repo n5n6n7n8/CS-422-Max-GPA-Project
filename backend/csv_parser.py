@@ -318,7 +318,7 @@ def load_sample_grade_row(csv_path) -> dict | str:
 
 
 def load_degree_data_from_csv(csv_path):
-    """Read degree course data from CSV and return in format for models.create_degree"""
+    """Read degree course data from CSV and return in format for models.create_or_update_degree"""
     degree_courses = []
 
     with open(csv_path, newline="", encoding="utf-8-sig") as file:

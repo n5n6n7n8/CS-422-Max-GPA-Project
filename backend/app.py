@@ -2,7 +2,7 @@ import os
 from io import BytesIO
 import click
 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, jsonify, render_template, request, send_file
 
 from db import close_db
 from models import insert_grade_data
@@ -14,97 +14,27 @@ app.config["DATABASE"] = "database.db"
 app.teardown_appcontext(close_db)
 
 
-# Command line command to load grade data from a CSV file into the database
-# We'll change this to an endpoint later on to hook it up to the frontend
-@app.cli.command('load-grade-data')
-@click.argument('csv_path')
-def load_grade_data(csv_path):
-    from csv_parser import load_grade_data_from_csv
-    normalized_rows = load_grade_data_from_csv(csv_path)
-    insert_count = insert_grade_data(normalized_rows)
-    click.echo(f"Loaded {insert_count} rows into the database.")
-
-
-# Command line command to add degree program to DB w/ data from CSV
-# This is just some sample code to test out the DB operations
-@app.cli.command('create-degree')
-@click.argument('degree_title')
-@click.argument('csv_path')
-def create_degree(degree_title, csv_path):
-    from models import create_degree
-    from csv_parser import load_degree_data_from_csv
-
-    rows = load_degree_data_from_csv(csv_path)
-    existing_degree, insert_count = create_degree(degree_title, rows)
-
-    if existing_degree:
-        click.echo(f"Updated degree program '{degree_title}' with {insert_count} courses.")
-    else:
-        click.echo(f"Created degree program '{degree_title}' with {insert_count} courses.")
-
-
-# Test command to get academic years available in grade history table
-@app.cli.command('get-ays')
-def get_academic_years():
-    from models import get_academic_years
-    ays = get_academic_years()
-    click.echo(f"Academic years in grade history: {ays}")
-
-# Test command to get degrees available in degree table
-@app.cli.command('get-degrees')
-def get_degrees():
-    from models import get_degrees
-    degrees = get_degrees()
-    click.echo(f"Degrees in degree table: {degrees}")
-
-# Test command to clear degree and degree_courses tables
-@app.cli.command('clear-degrees')
-def clear_degrees_command():
-    from models import clear_degrees
-    clear_degrees()
-    click.echo("Cleared degree and degree_courses tables.")
-
-# Test command to print all available degree CSV files in degree_data directory
-@app.cli.command('list-degree-csvs')
-def list_degree_csvs():
-    from models import get_available_degree_csv_files
-    csv_files = get_available_degree_csv_files()
-    if not csv_files:
-        click.echo("No CSV files found in degree_data folder.")
-    else:
-        click.echo("Available degree CSV files:")
-        for f in csv_files:
-            click.echo(f" - {f}")
-
-# Test command to print all available grade CSV files in grade_data directory
-@app.cli.command('list-grade-csvs')
-def list_grade_csvs():
-    from models import get_available_grade_csv_files
-    csv_files = get_available_grade_csv_files()
-    if not csv_files:
-        click.echo("No CSV files found in grade_data folder.")
-    else:
-        click.echo("Available grade CSV files:")
-        for f in csv_files:
-            click.echo(f" - {f}")
-
-
+# Homepage route
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
+# Student page route
 @app.route('/student')
 def student():
     from models import get_academic_years, get_degrees
     return render_template('student.html', years=get_academic_years(), degrees=get_degrees())
 
 
+# Admin page route
 @app.route('/admin')
 def admin():
-    return render_template('admin.html')
+    from models import get_available_grade_csv_files, get_available_degree_csv_files
+    return render_template('admin.html', grade_csvs=get_available_grade_csv_files(), degree_csvs=get_available_degree_csv_files())
 
 
+# Route for generating & displaying PDF on-the-fly based on selected degree & year range
 @app.route('/download-report')
 def download_report():
     degree_id = request.args.get('degree_id', type=int)
@@ -121,6 +51,78 @@ def download_report():
         download_name='degree_report.pdf',
         mimetype='application/pdf',
     )
+
+
+# API endpoint for getting sample row data from grade CSV.
+# Used for previewing data on frontend for confirmation
+@app.route('/api/grade-sample-row', methods=['GET'])
+def grade_sample_row():
+    grade_csv = request.args.get('csv', type=str)
+    if grade_csv is None:
+        return "ERROR: Missing required parameter 'csv'", 400
+
+    from csv_parser import load_sample_grade_row
+    sample = load_sample_grade_row(f"grade_data/{grade_csv}")
+    success = isinstance(sample, dict)
+    return jsonify({"success": success, "payload": sample})
+
+
+# API endpoint for getting sample row data from degree CSV.
+# Used for previewing data on frontend for confirmation
+@app.route('/api/degree-sample-row', methods=['GET'])
+def degree_sample_row():
+    degree_csv = request.args.get('csv', type=str)
+    if degree_csv is None:
+        return "ERROR: Missing required parameter 'csv'", 400
+
+    from csv_parser import load_sample_degree_row
+    sample = load_sample_degree_row(f"degree_data/{degree_csv}")
+    success = isinstance(sample, dict)
+    return jsonify({"success": success, "payload": sample})
+
+
+# API endpoint for uploading grade data from CSV and inserting into database
+@app.route('/api/upload-grades', methods=['POST'])
+def upload_grade():
+    data = request.get_json()
+    csv_path = data.get('csv')
+
+    from models import insert_grade_data
+    from csv_parser import load_grade_data_from_csv
+
+    try:
+        rows = load_grade_data_from_csv(f"grade_data/{csv_path}")
+        insert_count = insert_grade_data(rows)
+        return jsonify({"success": True, "message": f"Inserted {insert_count} grade data rows from CSV into the database."})
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error processing grade data: {str(e)}"}), 500
+
+
+# API endpoint for uploading degree data from CSV and inserting into database
+@app.route('/api/upload-degree', methods=['POST'])
+def upload_degree():
+    data = request.get_json()
+    degree_title = data.get('degree_title')
+    csv_path = data.get('csv')
+
+    from models import create_or_update_degree
+    from csv_parser import load_degree_data_from_csv
+
+    try:
+        rows = load_degree_data_from_csv(f"degree_data/{csv_path}")
+        existing_degree, insert_count = create_or_update_degree(degree_title, rows)
+
+        if existing_degree:
+            return jsonify({
+                "success": True,
+                "message": f"Successfully updated degree program '{degree_title}' with {insert_count} courses."})
+        else:
+            return jsonify({
+                "success": True,
+                "message": f"Successfully created degree program '{degree_title}' with {insert_count} courses."})
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error processing degree data: {str(e)}"}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

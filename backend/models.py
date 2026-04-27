@@ -36,7 +36,7 @@ def clear_degrees():
 
 # Add a new degree program to DB w/ the given title and list of courses (rows from CSV).
 # Use the output of csv_parser.load_degree_data_from_csv as input for this function.
-def create_degree(degree_title, rows):
+def create_or_update_degree(degree_title, rows):
     db = get_db()
     existing_degree = False
 
