@@ -1,6 +1,6 @@
 # Max GPA Calculator Project
 # Authors: Ben Elster, Ryder Gilman, Reed Nystrom, Harrison Ramos, Nate Wong
-# Date: May 5, 2026
+# Date: May 4, 2026
 # Course: CS 422 Software Methodologies
 # Description: Flask-based web application for calculating current and maximum possible GPA using degree requirements and grade data.
 
