@@ -5,7 +5,6 @@ import click
 from flask import Flask, jsonify, render_template, request, send_file
 
 from db import close_db
-from models import insert_grade_data
 from pdf_generator import generate_pdf_bytes
 
 template_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'frontend', 'templates')
@@ -125,4 +124,4 @@ def upload_degree():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
