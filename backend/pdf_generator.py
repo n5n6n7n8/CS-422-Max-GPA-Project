@@ -17,7 +17,7 @@ from matplotlib.axes import Axes
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib.figure import Figure
 
-from models import GradeCounts, InstructorDistribution, TermCourseData, get_term_course_data
+from models import GradeCounts, InstructorDistribution, TermCourseData, get_degree_title, get_term_course_data
 
 # Fixed x-axis bar order for each chart
 GRADE_LABELS = ("A", "B", "C", "DNF")
@@ -44,48 +44,6 @@ GRAPH_COL_GAP = 0.05
 # Width for each graph panel when placing 3 graphs side-by-side.
 # Computed from total width minus edge/column margins.
 GRAPH_WIDTH = (1.0 - PAGE_LEFT_MARGIN - PAGE_RIGHT_MARGIN - (2 * GRAPH_COL_GAP)) / 3.0
-
-# Prototype data used to test PDF creation and layout
-sample_data: TermCourseData = {
-	"Year 1 - Term 1": {
-		"BA 101Z - Introduction to Business": [
-			("Prof. A", (48, 31, 18, 7)),
-			("Prof. B", (40, 35, 19, 9)),
-			("Prof. C", (45, 29, 20, 6)),
-			("Prof. D", (38, 34, 21, 12)),
-		],
-		"MATH 111Z - Precalculus I: Functions": [
-			("Prof. E", (34, 30, 27, 12)),
-			# ("Prof. F", (29, 33, 26, 15)),
-			# ("Prof. G", (31, 28, 30, 14)),
-		],
-	},
-	"Year 1 - Term 2": {
-		"EC 201Z - Principles of Microeconomics": [
-			("Prof. H", (42, 33, 20, 8)),
-			("Prof. I", (39, 36, 18, 10)),
-			("Prof. J", (44, 31, 17, 9)),
-			("Prof. K", (36, 34, 22, 11)),
-			("Prof. L", (41, 30, 21, 10)),
-		],
-		"MATH 241 - Calculus for Business and Social Science I": [
-			("Prof. M", (28, 31, 29, 16)),
-			("Prof. N", (32, 27, 30, 15)),
-			# ("Prof. O", (30, 29, 28, 14)),
-			# ("Prof. P", (35, 26, 25, 13)),
-			# ("Prof. Q", (33, 30, 24, 12)),
-			# ("Prof. R", (29, 32, 26, 17)),
-		],
-		"BA 067 - Some course I made up to test page overflow": [
-			("Prof. S", (28, 31, 29, 16)),
-			("Prof. T", (32, 27, 30, 15)),
-			("Prof. U", (30, 29, 28, 14)),
-			("Prof. V", (35, 26, 25, 13)),
-			("Prof. W", (33, 30, 24, 12)),
-			("Prof. X", (29, 32, 26, 17)),
-		],
-	},
-}
 
 
 def _to_percentages(grade_counts: GradeCounts) -> tuple[float, float, float, float]:
@@ -277,9 +235,8 @@ def _build_term_pages(major_name: str, term_name: str, courses: dict[str, list[I
 def _write_pdf(pdf: PdfPages, degree_id, year_from, year_to) -> None:
 	"""Write the report pages to PdfPages"""
 
-	# TODO: Query SQL database for real course data
-	# Right now we just use sample data for testing
-	major_name = "Bachelor of Arts in Business Administration"
+	# Query SQLite database for degree name & course/grade data
+	major_name = get_degree_title(degree_id) or "Unknown Degree"
 	course_data = get_term_course_data(degree_id, year_from, year_to)
 
 	# Text for the front page of the report
@@ -294,12 +251,33 @@ Ryder Gilman
 Reed Nystrom
 Ben Elster
 Nate Wong"""
+	
+	total_grade_counts = GradeCounts((0, 0, 0, 0))
+	for term_courses in course_data.values():
+		for instructor_graphs in term_courses.values():
+			for _, grade_counts in instructor_graphs:
+				total_grade_counts = GradeCounts((
+					total_grade_counts[0] + grade_counts[0],
+					total_grade_counts[1] + grade_counts[1],
+					total_grade_counts[2] + grade_counts[2],
+					total_grade_counts[3] + grade_counts[3],
+				))
+	
+	gpa_prediction = (4.0 * total_grade_counts[0] + 3.0 * total_grade_counts[1] + 2.0 * total_grade_counts[2]) / (
+		total_grade_counts[0] + total_grade_counts[1] + total_grade_counts[2]
+	)
+	front_page_graph_text = f"""Overall grade distribution across all required courses in this degree plan.
+GPA Prediction: {gpa_prediction:.2f}"""
 
 	front_page_fig = plt.figure(figsize=(11, 14))
 	header_top = 1.0 - PAGE_TOP_MARGIN * 2 # add extra margin on first page
-	front_page_fig.text(0.5, header_top, f"Major: {major_name}", fontsize=16, weight="bold", ha="center", va="top")
+	front_page_fig.text(0.5, header_top, f"Degree: {major_name}", fontsize=16, weight="bold", ha="center", va="top")
 	front_page_fig.text(0.5, header_top - 0.03, front_page_text1, fontsize=16, ha="center", va="top")
 	front_page_fig.text(0.5, header_top - 0.13, front_page_text2, fontsize=10, ha="center", va="top")
+	# Add overall grade distribution for the entire major on the front page
+	create_grade_bar("ALL COURSES", total_grade_counts, ax=front_page_fig.add_axes([0.35, PAGE_TOP_MARGIN * 2, 0.3, 0.2]))
+	# Add explanatory text above the ALL COURSES graph
+	front_page_fig.text(0.5, PAGE_TOP_MARGIN * 2 + 0.2 + 0.02, front_page_graph_text, fontsize=12, weight="bold", ha="center", va="bottom")
 	pdf.savefig(front_page_fig)
 	plt.close(front_page_fig)
 

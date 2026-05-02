@@ -112,6 +112,13 @@ def get_degrees():
     return [(row['degree_id'], row['degree_title']) for row in rows]
 
 
+# Get degree title for a given degree_id
+def get_degree_title(degree_id):
+    db = get_db()
+    row = db.execute("SELECT degree_title FROM degree WHERE degree_id = ?", (degree_id,)).fetchone()
+    return row['degree_title'] if row else None
+
+
 # Takes a degree & year range, queries DB for grade data of courses that degree & year range,
 # and returns that data in the form of a TermCourseData object.
 def get_term_course_data(degree_id, year_from, year_to):
