@@ -75,9 +75,7 @@ The application will start on `http://127.0.0.1:5000`
 
 - Python 3.8+
 - Flask
-- SQLite3
-- pandas (if used in CSV processing)
-- reportlab (for PDF generation)
+- matplotlib
 
 All dependencies are listed in `requirements.txt`.
 
@@ -141,9 +139,9 @@ These are parsed and used to compute GPA values.
 1. Ensure CSV files are placed in the correct directories:
 - degree_data/
 - grade_data/
-2. Upload or update CSV data files through the admin interface
+2. Select CSV data files to upload through the admin interface
 3. Confirm data is successfully loaded
-4. Maintain dataset consistency
+4. Click "Upload Data" to upload the data
 
 ### Student Mode
 1. Navigate to the student interface
@@ -154,7 +152,7 @@ These are parsed and used to compute GPA values.
 
 ### Expected Output:
 A pdf containing:
-- Couse grade distributions
-- Instrutor statistics
-- Historical performance insights
+- List of required courses for that degree plan
+- Bar graphs of grade distributions for each course/instructor
+- Overall average grades for all courses & GPA prediction
 ---
